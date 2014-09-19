@@ -1,0 +1,19 @@
+Welcome to TextBuddy. mytextfile.txt is ready for use
+command: add little brown fox
+added to mytextfile.txt: “cookies is good”
+command: display
+1. cookies is good
+command: add I'm Hungry
+added to mytextfile.txt: “I'm Hungry"
+command: display
+1. cookies is good
+2. I'm Hungry
+command: delete 2
+deleted from mytextfile.txt: “I'm Hungry”
+command: display
+1. cookies is good
+command: clear
+all content deleted from mytextfile.txt
+command: display
+mytextfile.txt is empty
+command: exit
