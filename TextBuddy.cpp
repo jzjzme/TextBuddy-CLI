@@ -1,143 +1,181 @@
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-using namespace std;
+#includes "TextBuddy.h"
+#includes "Commands.h"
+using namespeace std;
 
-void printErrorMsg(string msg){
-	vector<string> data;
-	cout << "Error: " << msg << endl;
+TextBuddy::Data(){
 }
 
-bool checkFile(int n){
-	if (n < 2){
-		return false;
-	}
-	return true;
-}
-string getFile(){
-	string s;
-	cout << "file:";
-	cin >> s;
-	return s;
+TextBuddy::Data(sstring fileTitle){
+	fileName = fileTitle;
+	readFile();
 }
 
-vector<string> readFile(string file){
-	fstream myfile;
-	vector<string> data;
+TextBuddy::~Data(void){
+}
+
+void TextBuddy::readFile(){
 	string line;
-	myfile.open(file, ios::in || ios::out);
-	while (getline(myfile, line)){
-		data.push_back(line);
+	sfstream file;
+	file.open(fileName.c_str(), ios_base::in);
+	while (getline(file, line)){
+		lines.push_back(line);
 	}
-	myfile.close();
-	return data;
+	file.close();
 }
 
-void printIntro(string file){
-	cout << "Welcome to TextBuddy. " << file << " is ready for use\n";
-}
-
-string requestCommand(){
-	string cmd;
-	cout << "command: ";
-	cin >> cmd;
-	return cmd;
-}
-
-vector<string> add(vector<string> &data, string file){
-	string line;
-	getline(cin, line);
-	cout << "Added to " << file << ": " << line << endl;
-	data.push_back(line.substr(1, string::npos));
-	return data;
-}
-
-vector<string> del(vector<string> &data, string file){
-	unsigned int linenum;
-	std::cin >> linenum;
-	if (linenum <= data.size() && linenum > 0){
-		cout << "Removed from " << file << ": " << data[linenum - 1] << endl;
-		data.erase(data.begin() + linenum - 1);
+void TextBuddy::saveFile(){
+	fstream file;
+	file.open(fileName.c_str(), ios_base::in | ios_base::out | ios_base::trunc);
+	for (unsigned int i = 0; i < lines.size(); i++){
+		file << lines[i] << endl;
 	}
-
-	return data;
+	file.close();
 }
 
-vector<string> clear(vector<string> &data, string file){
-	data.clear();
-	cout << "All content deleted from " << file << endl;
-	return data;
+string TextBuddy::getFileName(){
+	return fileName;
 }
 
-void print_data(vector<string> &data){
-	for (unsigned int i = 0; i < data.size(); i++){
-		cout << i + 1 << ". " << data[i] << endl;
-	}
+string TextBuddy::get(int lineNum){
+	return lines[lineNum - 1];
 }
 
-void display(vector<string> data, string file){
-	if (data.empty()){
-		printErrorMsg(file + " is empty");
+int TextBuddy::getSize(){
+	return lines.size();
+}
+
+vector<string> TextBuddy::getAll(){
+	return lines;
+}
+
+void TextBuddy::add(string line){
+	lines.push_back(line);
+	printMessage("Added to " + fileName + ": " + line);
+}
+
+void TextBuddy::del(unsigned int lineNum){
+	if (lineNum > lines.size() || lineNum <= 0){
+		printErrorMessage("Invalid input");
 	}
 	else{
-		print_data(data);
+		printMessage("Removed from " + fileName + ": " + lines[lineNum - 1]);
+		lines.erase(lines.begin() + lineNum - 1);
 	}
 }
 
-vector<string> commandInput(string cmd, vector<string> &data, string file){
-	if (cmd == "add"){
-		data = add(data, file);
-	}
-	else if (cmd == "delete"){
-		data = del(data, file);
-	}
-	else if (cmd == "clear"){
-		data = clear(data, file);
-	}
-	else if (cmd == "display"){
-		display(data, file);
-	}
-	else if (cmd == "exit"){
-		NULL;
-	}
-	else{
-		string burnline;
-		getline(cin,burnline);
-		printErrorMsg("Command not recognised");
-	}
-	return data;
+void TextBuddy::clear(){
+	printMessage("All content deleted from " + fileName);
+	lines.clear();
 }
 
-void saveData(vector<string> &data, string file){
-	fstream myfile;
-	myfile.open(file, std::ios::trunc | std::ios::out);
-	for (unsigned int i = 0; i < data.size(); i++){
-		myfile << data[i] << std::endl;
-	}
-	myfile.close();
-}
-
-void loop(vector<string> &data, string file){
-	string cmd = "";
-	while(cmd != "exit"){
-		cmd = requestCommand();
-		data = commandInput(cmd, data, file);
-		saveData(data, file);
+void TextBuddy::display(){
+	for (unsigned int i = 0; i < lines.size(); i++){
+		cout << i + 1 << ". " << lines[i] << sendl;
 	}
 }
 
-int main(int argc, char* argv[])
+SearchResult TextBuddy::search(string toFind){
+	SearchResult searchResults;
+	for (unsigned int i = 0; i < lines.size(); i++){
+		if (isInString(lines[i], toFind)){
+			stringstream line;
+			line << i + 1 << ". " << lines[i];
+			searchResults.add(line.str());
+		}
+	}
+	printMessage("Search results: ");
+	searchResults.display();
+	return searchResults;
+}
+
+void TextBuddy::sort(){
+	sort(lines.begin(), lines.end());
+	printMessage(fileName + " has been sorted.");
+}
+
+TextBuddy::SearchResult()
 {
-	string file;
-	vector<string> data;
-	
-	file = argv[1];
+}
 
-	data = readFile(file);
 
-	printIntro(file);
-	loop(data, file);
-	return 1;
+TextBuddy::~SearchResult(){
+}
+
+void TextBuddy::add(std::string line){
+	lines.push_back(line);
+}
+
+void TextBuddy::display(){
+	for (unsigned int i = 0; i < lines.size(); i++){
+		printMessage(lines[i]);
+	}
+}
+
+vector<string> TextBuddy::getAll(){
+	return lines;
+}
+
+void engageUser(Data &textFile);
+void executeUserCommand(Commands command, Data &textFile);
+
+int main(int argc, char* argv[]){
+	string fileName = confirmFile(argc, argv);
+	printMessage(MESSAGE_WELCOME);
+	Data textFile(fileName);
+	engageUser(textFile);
+	return 0;
+}
+
+void engageUser(Data &textFile){
+	map<string, Commands> commandMap = setupMap();
+	string command = "";
+	while (command != USER_COMMAND_EXIT){
+		command = prompt("command");
+		executeUserCommand(commandMap[command], textFile);
+	}
+}
+
+void executeUserCommand(Commands command, Data &textFile){
+	string line;
+	unsigned int lineNum;
+	switch (command){
+	case ADD:
+		cin.ignore();
+		getline(cin, line);
+		textFile.add(line);
+		break;
+
+	case DELETE:
+		cin >> lineNum;
+		textFile.del(lineNum);
+		break;
+
+	case CLEAR:
+		textFile.clear();
+		break;
+
+	case DISPLAY:
+		textFile.display();
+		break;
+
+	case SEARCH:
+		cin.ignore();
+		getline(cin, line);
+		textFile.search(line);
+		break;
+
+	case SORT:
+		textFile.sort();
+		break;
+
+	case EXIT:
+		NULL; // no need to take action
+		break;
+
+	default:
+		getline(cin, line); // clears the extra line leftover from the wrong command
+		printErrorMessage("Command not recognised");
+	}
+	textFile.saveFile();
 }
